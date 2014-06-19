@@ -1,7 +1,3 @@
-require "wwit/archive/version"
-
-module WWIT
-  module Archive
-    # Your code goes here...
-  end
-end
+require 'wwit/archive/version'
+require 'wwit/archive/movie'
+require 'wwit/archive/movie_files'
