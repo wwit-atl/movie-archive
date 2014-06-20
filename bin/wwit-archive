@@ -3,7 +3,6 @@
 require 'rubygems'
 require 'getoptions'
 require 'fileutils'
-# require 'escape'
 require 'wwit/archive'
 
 ##
@@ -12,9 +11,9 @@ require 'wwit/archive'
 
 # Defaults for options
 defaults = {
-    'source' => [ "." ],
-    'dest'   => ".",
-    'days'   => 30,
+    source: [ '.' ],
+    dest:   '.',
+    days:   30,
 }
 
 Version = WWIT::Archive::VERSION
@@ -65,7 +64,7 @@ end
 return unless __FILE__ == $0
 
 opt = GetOptions.new(
-    %w(
+  %w(
     help
     verbose|v+
     version|V
@@ -81,16 +80,16 @@ usage if opt.help
 version if opt.version
 
 # Set defaults for missing options
-source = opt.source ? opt.source : defaults['source']
-dest   = opt.dest
-days   = opt.days ? opt.days : defaults['days']
+source = opt.source || defaults[:source]
+dest   = opt.dest   || defaults[:dest]
+days   = opt.days   || defaults[:days]
 days   = 0 if days < 0
 
 raise "Destination directory doesn't exist: #{dest}" if dest and not File.directory?( dest )
 
 if opt.verbose >= 3
-  puts "Source is " + source.join(', ')
-  puts "Dest   is " + dest if dest
+  puts "Source is #{source.join(', ')}"
+  puts "Dest   is #{dest}" if dest
   puts "Working on files older than #{days} day#{days > 1 ? 's' : ''}" if days > 0
 end
 
@@ -98,11 +97,11 @@ end
 movies = WWIT::MovieFiles.new( source, opt.verbose >= 5 )
 
 if movies.empty?
-  puts "No Files Found." if opt.verbose
+  puts 'No Files Found.' if opt.verbose
   exit
 end
 
-action = opt.copy ? "copying" : "moving"
+action = opt.copy ? 'copying' : 'moving'
 
 if opt.verbose
   print "#{action} #{movies.count} files... "
@@ -114,7 +113,7 @@ end
 today = Time.new
 
 # Process each movie file
-for movie in movies
+movies.each do |movie|
 
   # Make sure it's older than the days to keep
   days_old = ( (today - movie.birth) / 86400 )
@@ -142,6 +141,6 @@ for movie in movies
 
 end
 
-puts "Complete" if opt.verbose
+puts 'Complete' if opt.verbose
 exit( 0 )
 

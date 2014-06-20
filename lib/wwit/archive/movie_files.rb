@@ -5,32 +5,25 @@
 #
 module WWIT
   class MovieFiles
-    def initialize( source = ["."], debug = false )
+    def initialize( source = ['.'], debug = false )
       @debug  = debug
       @files  = Array.new
 
-      for dir in source
+      source.each do |dir|
         unless File.directory?(dir)
           raise "Invalid Directory: #{dir}"
           next
         end
 
-        Dir.chdir( dir ) {
-          for file in Dir.glob("*.{mp4,m4v}").sort
-            next unless File.file?( file )
-            @files.push( MovieFile.new( dir, file, debug ) )
-          end
-        }
+        Dir.chdir( dir ) do
+          @files << Dir.glob("*.{mp4,m4v}").sort.map { |file| Movie.new( dir, file, debug ) unless File.file?(file) }
+        end
       end
     end
 
     # Returns an array of directories representing the files in the container
     def pwd
-      dirs = Hash.new
-      for file in @files.each
-        dirs[ file.dir ] = "" if file.respond_to? :dir
-      end
-      dirs.keys
+      @files.map { |file| file.dir if file.respond_to? :dir }
     end
 
     # Iterator
@@ -50,11 +43,8 @@ module WWIT
 
     # Returns an array of filenames
     def to_a
-      filelist = Array.new
-      for file in @files.each
-        filelist.push( file.filename ) if file.respond_to? :filename
-      end
-      filelist
+      @files.map { |file| file.filename if file.respond_to? :filename }
     end
+
   end # of MovieFiles container class
 end
