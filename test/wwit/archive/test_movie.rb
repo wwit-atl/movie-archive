@@ -2,34 +2,44 @@ require_relative '../../minitest_helper'
 
 module WWIT
   class TestMovie < MiniTest::Test
+    include TestSetup
+
     def setup
+      super
       @datetime_sunday_1am = Time.parse('2014-Jun-22 01:00') # Sunday @ 1AM
-      @dir = "#{__dir__}/../../samples"
-      @file = 'test-friday-1k.mp4'
-      @movie = Movie.new(@dir, @file)
+      @movie = Movie.new(@test_file)
       refute_nil @movie
       assert_instance_of WWIT::Movie, @movie
     end
 
     def test_movie_valid?
-      assert File.exist?("#{@dir}/#{@file}"), "#{@dir}/#{@file} does not exist"
+      assert File.exist?(@test_file), "#{@test_file} does not exist"
       assert @movie.valid?, '@movie is not valid'
 
       # Create a bogus file and verify it doesn't actually exist
-      file = "#{@dir}/bogus"
+      file = "#{@test_directory}/bogus"
       refute File.exist?(file), "#{file} exists!?"
 
       # Create a new Movie object and verify it's not valid?
-      movie = Movie.new(@dir, file)
-      refute movie.valid?, %q{@movie is valid but shouldn't be}
+      assert_raises RuntimeError do
+        Movie.new(file)
+      end
+    end
+
+    def test_movie_directory
+      assert_equal @test_directory, @movie.directory
     end
 
     def test_movie_fullpath
-      assert_equal File.expand_path("#{@dir}/#{@file}"), @movie.fullpath
+      assert_equal File.expand_path(@test_file), @movie.fullpath
+    end
+
+    def test_movie_filename
+      assert_equal File.basename(@test_file), @movie.filename
     end
 
     def test_movie_basename
-      assert_equal File.basename(@file, '.mp4'), @movie.basename
+      assert_equal File.basename(@test_file, '.mp4'), @movie.basename
     end
 
     def test_movie_ext
@@ -81,8 +91,14 @@ module WWIT
         @movie.newfilename(nil)
       end
 
-      assert_equal File.expand_path(@dir) + '/' + filename, @movie.newfilename
+      assert_equal File.expand_path(@test_directory) + '/' + filename, @movie.newfilename
       assert_equal "/tmp/#{filename}", @movie.newfilename('/tmp')
+    end
+
+    def test_movie_debug
+      refute @movie.debug
+      @movie.debug = true
+      assert @movie.debug
     end
   end
 end

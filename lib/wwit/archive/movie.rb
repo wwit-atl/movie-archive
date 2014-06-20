@@ -4,13 +4,14 @@
 module WWIT
   class Movie < File
 
-    attr_reader :filename, :directory
+    attr_reader :file
     attr_accessor :debug
 
-    def initialize( dir, file, debug = false )
-      @debug     = debug
-      @directory = dir
-      @filename  = file
+    def initialize( file, debug = false )
+      raise RuntimeError, "ENOEXIST: #{file} is not valid" unless File.exist?(file)
+
+      @debug = debug
+      @file  = file
     end
 
     KILOBYTE = 2 ** 10   # Base 2 (1024)
@@ -24,14 +25,23 @@ module WWIT
       File.exist?(fullpath)
     end
 
+    def directory
+      File.dirname(fullpath)
+    end
+
     # Returns the full pathname to the file
     def fullpath
-      File.expand_path( @filename, @directory )
+      File.expand_path( @file )
     end
 
     # Returns the filename minus the extension
     def basename
       File.basename( fullpath, ext )
+    end
+
+    # Returns the filename minus the directory
+    def filename
+      File.basename( fullpath )
     end
 
     # Returns the file extension
@@ -102,7 +112,7 @@ module WWIT
     end
 
     # Returns a string representing the calculated filename including the showdate and showtime
-    def newfilename( destdir = @directory )
+    def newfilename( destdir = directory )
       raise ArgumentError, 'Directory required' unless File.directory?( destdir.to_s )
 
       fname = date + '-' + time
@@ -121,7 +131,7 @@ module WWIT
     end
 
     # Moves the file to dest
-    def move( dest = @directory, verbose = 0 )
+    def move( dest = directory, verbose = 0 )
       newfname = newfilename( dest )
       return if File.identical?( fullpath, newfname )
       puts "move #{fullpath} -> #{newfname} ( #{size_to_s} )" if verbose
@@ -129,19 +139,16 @@ module WWIT
     end
 
     # Copies the file to dest (preserving time and ownership information)
-    def copy( dest = @directory, verbose = 0 )
+    def copy( dest = directory, verbose = 0 )
       newfname = newfilename( dest )
       return if File.identical?( fullpath, newfname )
       puts "copy #{fullpath} -> #{newfname} ( #{size_to_s} )" if verbose
       FileUtils.cp( fullpath, newfname, :preserve => 1 )
     end
 
-    #
-    # Method aliases
-    #
-    alias :dir    :directory
-    alias :name   :filename
-    alias :to_s   :filename
+    alias_method :dir,      :directory
+    alias_method :name,     :filename
+    alias_method :to_s,     :filename
 
   end # of MovieFile class
 end
