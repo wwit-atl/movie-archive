@@ -3,21 +3,20 @@
 require 'wwit/archive'
 require 'colorize'
 
-# Don't do anything if we're only including this file's classes
-# return unless __FILE__ == $0
-
 opt = WWIT::Archive::Options.parse(ARGV)
 
 if opt.verbose
-  puts "Source directories are".light_white + " #{opt.source.join(', ').green}"
-  puts "Destination directory is".light_white + " #{(opt.dest ? opt.dest : 'same as source file').green}"
+  puts 'Source directories are'.light_white + " #{opt.source.join(', ').green}"
+  puts 'Destination directory is'.light_white + " #{(opt.dest ? opt.dest : 'same as source file').green}"
   puts "We'll be working on files older than ".light_white +
            opt.days.to_s.green + " day#{opt.days > 1 ? 's' : ''}".light_white if opt.days > 0
 end
 
-print "\n" if opt.dryrun and opt.verbose
-puts "Hey! DRYRUN is enabled, so no filesystem changes will be made.".yellow if opt.dryrun
-print "\n" if opt.dryrun and opt.verbose
+if opt.dryrun
+  print "\n" if opt.verbose
+  puts 'Hey! DRYRUN is enabled, so no filesystem changes will be made.'.yellow
+  print "\n" if opt.verbose
+end
 
 # Create our movies object -- which, in turn, contains each movie file in the given source dir(s)
 movies = WWIT::Archive::Movies.new( opt.source )
@@ -34,7 +33,7 @@ file_count = 0
 
 # Process each movie file
 movies.each do |movie|
-  dest = opt.dest || movie.directory
+  new_filename = movie.newfilename( opt.dest || movie.directory )
 
   # Make sure it's older than the days to keep
   if opt.days > movie.age_in_days
@@ -42,16 +41,17 @@ movies.each do |movie|
     next
   end
 
-  print "%s %s ->\n     %s ( %s )\n".light_black % [
-      opt.future_verb,
-      movie.fullpath,
-      movie.newfilename( dest ),
-      movie.size_to_s
-  ] if opt.debug
+  print "%s -> %s ( %s )\n" % [
+      (opt.debug ? movie.fullpath : movie.filename).light_blue,
+      new_filename.light_blue,
+      movie.size_to_s.light_black
+  ] if opt.verbose
 
   next if opt.dryrun
 
-  movie.process( opt.copy, dest )
+  # Actually copy or move the file
+  movie.process( opt.copy, new_filename )
+
   file_count += 1
 end
 

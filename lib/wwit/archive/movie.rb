@@ -13,7 +13,6 @@ module WWIT
         raise RuntimeError, "ENOEXIST: #{file} is not valid" unless File.exist?(file)
         @file = file
         @output = []
-        @debug_output = []
       end
 
       # Boolean, is file valid?
@@ -127,18 +126,14 @@ module WWIT
         # If the file already exists, append a number
         index = 0
         while File.exist?( newfname )
-          @debug_output << ">>> Comparing #{fullpath} with #{newfname}..."
           break if File.identical?( fullpath, newfname )
           newfname = File.expand_path( fname, destdir ) + "-" + ( index += 1 ).to_s + ext
-          @debug_output << ">>> Not the same, generated #{newfname}"
         end
 
         newfname
       end
 
-      def process( copy = false, dest = directory )
-        newfname = newfilename( dest )
-
+      def process( copy = false, newfname = newfilename )
         if File.identical?( fullpath, newfname )
           return "#{fullpath} already exists in #{dest}"
         end
