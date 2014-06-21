@@ -1,103 +1,26 @@
 #!/usr/bin/env ruby
 
-require 'rubygems'
-require 'getoptions'
 require 'fileutils'
 require 'wwit/archive'
 
-##
-## Constants / Globals
-##
-
-# Defaults for options
-defaults = {
-    source: [ '.' ],
-    dest:   '.',
-    days:   30,
-}
-
-Version = WWIT::Archive::VERSION
-Ident   = 'wwit-movie-archive'
-Author  = 'Donovan C. Young'
-Vstring = "#{Ident} v.#{Version} - #{Author}"
-
-##
-## Functions
-##
-
-# Display version string and exit
-def version
-  puts Vstring
-  exit( -1 )
-end
-
-# Display help/usage information and exit
-def usage
-  print <<-EoT
-
-#{Vstring}
-
-Usage: #{$0} [OPTIONS]
-
-  [OPTIONS]
-
-    --help    | -h                     This help file
-    --version | -V                     Show the version infomation and exit
-    --verbose | -v                     Increase program output (may be repeated)
-
-    --source  | -s <DIR [DIR [...]]>   Searches for files in DIR (multiple directories may be given)
-    --dest    | -d <DIR>               This is where the resulting files will be placed.
-    --days    | -D <#>                 The number of days to keep in the current directory.
-
-    --copy    | -c                     Copy the file (rather than move it)
-    --dryrun                           Doesn't actually make changes to the filesystem
-
-  EoT
-  exit( -1 )
-end
-
-##
-## MAIN
-##
-
 # Don't do anything if we're only including this file's classes
-return unless __FILE__ == $0
+# return unless __FILE__ == $0
 
-opt = GetOptions.new(
-  %w(
-    help
-    verbose|v+
-    version|V
-    dryrun
-    copy
-    source|s=@s
-    dest|d=s
-    days|D=i
-  )
-)
+opt = WWIT::Archive::Options.parse(ARGV)
 
-usage if opt.help
-version if opt.version
-
-# Set defaults for missing options
-source = opt.source || defaults[:source]
-dest   = opt.dest   || defaults[:dest]
-days   = opt.days   || defaults[:days]
-days   = 0 if days < 0
-
-raise "Destination directory doesn't exist: #{dest}" if dest and not File.directory?( dest )
-
-if opt.verbose >= 3
-  puts "Source is #{source.join(', ')}"
-  puts "Dest   is #{dest}" if dest
-  puts "Working on files older than #{days} day#{days > 1 ? 's' : ''}" if days > 0
+if opt.verbose
+  puts "Source directories are #{opt.source.join(', ')}"
+  puts "Destination directory is #{opt.dest ? opt.dest : 'determined by source file'}"
+  puts "We'll be working on files older than #{opt.days} day#{opt.days > 1 ? 's' : ''}" if opt.days > 0
 end
+
+puts "\nHey! DRYRUN is enabled, so no filesystem changes will be made." if opt.dryrun
 
 # Create our movies object -- which, in turn, contains each movie file in the given source dir(s)
-movies = WWIT::MovieFiles.new( source, opt.verbose >= 5 )
+movies = WWIT::Archive::Movies.new( opt.source, debug: opt.debug )
 
 if movies.empty?
-  puts 'No Files Found.' if opt.verbose
+  puts 'Hmm, no movie files were found.  Check your source directories?' if opt.verbose
   exit
 end
 
@@ -106,41 +29,43 @@ action = opt.copy ? 'copying' : 'moving'
 if opt.verbose
   print "#{action} #{movies.count} files... "
   $stdout.flush
-  puts if opt.verbose > 1
+  puts if opt.verbose
 end
 
 # Today's datetime
 today = Time.new
+file_count = 0
 
 # Process each movie file
 movies.each do |movie|
 
   # Make sure it's older than the days to keep
   days_old = ( (today - movie.birth) / 86400 )
-  if days_old <= days
-    puts "Skipped #{movie}:  Too New (#{days_old.to_i} days old)" if opt.verbose >= 3
+  if days_old <= opt.days
+    puts "Skipped #{movie}:  Too New (#{days_old.to_i} days old)" if opt.verbose
     next
   end
 
-  dest = movie.dir unless dest
+  dest = opt.dest || movie.dir
   newfile = movie.newfilename( dest )
 
-  puts "#{action} #{movie.fullpath} -> #{newfile} ( #{movie.size_to_s} )" if opt.verbose >= 4
+  puts "#{action} #{movie.fullpath} -> #{newfile} ( #{movie.size_to_s} )" if opt.debug
 
   # Skip further processing if --dryrun was given
   next if opt.dryrun
 
   if opt.copy
-    movie.copy( dest, opt.verbose >= 3 )
-    print "+ " if opt.verbose == 1
+    movie.copy( dest, opt.debug )
+    print "+ " if opt.verbose
   else
-    movie.move( dest, opt.verbose >= 3 )
-    print "> " if opt.verbose == 1
+    movie.move( dest, opt.debug )
+    print "> " if opt.verbose
   end
   $stdout.flush # Flush anything in the STDOUT buffer
 
+  file_count += 1
 end
 
-puts 'Complete' if opt.verbose
+puts "Complete - #{file_count} files #{opt.copy ? 'copied' : 'moved'}" if opt.verbose
 exit( 0 )
 
