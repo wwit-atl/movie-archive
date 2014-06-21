@@ -1,3 +1,5 @@
+require 'fileutils'
+
 #
 # MovieFile Object Class
 #
@@ -5,14 +7,13 @@ module WWIT
   module Archive
     class Movie < File
 
-      attr_reader :file
-      attr_accessor :debug
+      attr_reader :file, :output
 
-      def initialize( file, debug = false )
+      def initialize( file )
         raise RuntimeError, "ENOEXIST: #{file} is not valid" unless File.exist?(file)
-
-        @debug = debug
-        @file  = file
+        @file = file
+        @output = []
+        @debug_output = []
       end
 
       # Boolean, is file valid?
@@ -116,29 +117,27 @@ module WWIT
         # If the file already exists, append a number
         index = 0
         while File.exist?( newfname )
-          puts ">>> Comparing #{fullpath} with #{newfname}..." if @debug
+          @debug_output << ">>> Comparing #{fullpath} with #{newfname}..."
           break if File.identical?( fullpath, newfname )
           newfname = File.expand_path( fname, destdir ) + "-" + ( index += 1 ).to_s + ext
-          puts ">>> Not the same, generated #{newfname}" if @debug
+          @debug_output << ">>> Not the same, generated #{newfname}"
         end
 
         newfname
       end
 
-      # Moves the file to dest
-      def move( dest = directory, verbose = 0 )
+      def process( dest = directory, copy = false )
         newfname = newfilename( dest )
-        return if File.identical?( fullpath, newfname )
-        puts "move #{fullpath} -> #{newfname} ( #{size_to_s} )" if verbose
-        FileUtils.mv( fullpath, newfname )
-      end
 
-      # Copies the file to dest (preserving time and ownership information)
-      def copy( dest = directory, verbose = 0 )
-        newfname = newfilename( dest )
-        return if File.identical?( fullpath, newfname )
-        puts "copy #{fullpath} -> #{newfname} ( #{size_to_s} )" if verbose
-        FileUtils.cp( fullpath, newfname, :preserve => 1 )
+        if File.identical?( fullpath, newfname )
+          return "#{fullpath} already exists in #{dest}"
+        end
+
+        if copy
+          FileUtils.cp( fullpath, newfname, :preserve => 1 )
+        else
+          FileUtils.mv( fullpath, newfname )
+        end
       end
 
       alias_method :dir,      :directory

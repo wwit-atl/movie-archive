@@ -10,11 +10,19 @@ module WWIT
       end
 
       def test_options_defaults
-        assert_equal Options.default_options.hash, @options.hash
+        Options.default_options.each_key do |key|
+          assert_equal Options.default_options[key], @options[key]
+        end
       end
 
       def test_options_verbose_default
         assert @options.verbose, 'Verbose should be ON by default'
+      end
+
+      def test_options_actions
+        assert_equal 'move', @options.future_verb
+        assert_equal 'moved', @options.past_verb
+        assert_equal 'moving', @options.present_verb
       end
 
       def test_options_verbose

@@ -20,12 +20,17 @@ module WWIT
 
       def self.parse( argv_opts = [] )
 
-        options = OpenStruct.new
-
-        # Set defaults
-        Options.default_options.each do |key, value|
-          options[key] = value
-        end
+        options = Struct.new( *Options.default_options.keys ) do
+          def future_verb
+            copy ? 'copy' : 'move'
+          end
+          def present_verb
+            copy ? 'coping' : 'moving'
+          end
+          def past_verb
+            copy ? 'copied' : 'moved'
+          end
+        end.new( *Options.default_options.values )
 
         opt_parser = OptionParser.new do |opts|
           opts.banner = "Usage: #{IDENT} [options]"

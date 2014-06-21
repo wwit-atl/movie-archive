@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
 
-require 'fileutils'
 require 'wwit/archive'
 
 # Don't do anything if we're only including this file's classes
@@ -14,23 +13,19 @@ if opt.verbose
   puts "We'll be working on files older than #{opt.days} day#{opt.days > 1 ? 's' : ''}" if opt.days > 0
 end
 
-puts "\nHey! DRYRUN is enabled, so no filesystem changes will be made." if opt.dryrun
+puts if opt.dryrun and opt.verbose
+puts "Hey! DRYRUN is enabled, so no filesystem changes will be made." if opt.dryrun
+puts if opt.dryrun and opt.verbose
 
 # Create our movies object -- which, in turn, contains each movie file in the given source dir(s)
-movies = WWIT::Archive::Movies.new( opt.source, debug: opt.debug )
+movies = WWIT::Archive::Movies.new( opt.source )
 
 if movies.empty?
   puts 'Hmm, no movie files were found.  Check your source directories?' if opt.verbose
   exit
 end
 
-action = opt.copy ? 'copying' : 'moving'
-
-if opt.verbose
-  print "#{action} #{movies.count} files... "
-  $stdout.flush
-  puts if opt.verbose
-end
+puts "#{opt.present_verb} #{movies.count} files... " if opt.verbose
 
 # Today's datetime
 today = Time.new
@@ -46,26 +41,22 @@ movies.each do |movie|
     next
   end
 
-  dest = opt.dest || movie.dir
-  newfile = movie.newfilename( dest )
+  print "%s %s ->\n     %s ( %s )\n" % [
+      opt.future_verb,
+      movie.fullpath,
+      movie.newfilename( opt.dest || movie.dir ),
+      movie.size_to_s
+  ] if opt.verbose
 
-  puts "#{action} #{movie.fullpath} -> #{newfile} ( #{movie.size_to_s} )" if opt.debug
-
-  # Skip further processing if --dryrun was given
-  next if opt.dryrun
-
-  if opt.copy
-    movie.copy( dest, opt.debug )
-    print "+ " if opt.verbose
-  else
-    movie.move( dest, opt.debug )
-    print "> " if opt.verbose
+  if opt.dryrun
+    puts 'Processing skipped due to --dryrun' if opt.verbose
+    next
   end
-  $stdout.flush # Flush anything in the STDOUT buffer
 
+  movie.process( opt.dest || movie.directory, opt.copy )
   file_count += 1
 end
 
-puts "Complete - #{file_count} files #{opt.copy ? 'copied' : 'moved'}" if opt.verbose
+puts "Complete - #{file_count} files #{opt.past_verb}" if opt.verbose
 exit( 0 )
 

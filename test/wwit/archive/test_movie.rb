@@ -96,11 +96,6 @@ module WWIT
         assert_equal "/tmp/#{filename}", @movie.newfilename('/tmp')
       end
 
-      def test_movie_debug
-        refute @movie.debug
-        @movie.debug = true
-        assert @movie.debug
-      end
     end
   end
 end

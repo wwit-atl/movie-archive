@@ -9,14 +9,13 @@ module WWIT
   module Archive
     class Movies
 
-      def initialize( source_dirs = '.', opts = {})
+      def initialize( source = '.', opt = {} )
         @file_list = []
+        @opt = opt
 
-        debug = !!opts[:debug]
-
-        [source_dirs].flatten.each do |dir|
+        [source].flatten.each do |dir|
           raise RuntimeError, "Invalid Directory: #{dir}" unless File.directory?(dir)
-          Dir.glob(dir + '/*.{mp4,m4v}').sort.each { |file| @file_list << Movie.new( file, debug ) }
+          Dir.glob(dir + '/*.{mp4,m4v}').sort.each { |file| @file_list << Movie.new( file ) }
         end
 
         # Clean up the data
