@@ -6,7 +6,7 @@ module WWIT
     AEMAIL        = 'dyoung522@gmail.com'
     SUMMARY       = %q{Archives WWIT Show files}
     DESCRIPTION   = %q{Provides a runtime binary which can be called from terminal or cron.}
-    HOMEPAGE      = "http://github.com/dyoung522/#{IDENT}"
+    HOMEPAGE      = "https://github.com/wwit-atl/#{IDENT}"
     LICENSE       = 'MIT'
 
     VSTRING       = "#{IDENT} v.#{VERSION} - #{AUTHOR}, 2014"
