@@ -71,7 +71,7 @@ module WWIT
           opts.on('-v', '--[no-]verbose', 'Run verbosely (default)') { |v| options.verbose = v }
           opts.on('-q', '--silent', 'Run quietly (same as --no-verbose)') { options.verbose = false }
           opts.on('--dryrun', %q{Don't actually modify any files, just show what would happen}) { options.dryrun = true }
-          opts.on('--debug', 'Run with debugging options') { options.debug = debug }
+          opts.on('--debug', 'Run with debugging options') { options.debug = true }
 
           opts.on_tail('-h', '--help', 'Show this message') do
             puts VSTRING + "\n\n"

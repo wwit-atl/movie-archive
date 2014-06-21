@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-# Specify your gem's dependencies in wwit-archive.gemspec
+# Specify your gem's dependencies in wwit-movie-archive.gemspec
 gemspec
 
 group :test, :development do

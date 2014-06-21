@@ -1,7 +1,7 @@
 module WWIT
   module Archive
     VERSION       = '1.5.1'
-    IDENT         = 'wwit-archive'
+    IDENT         = 'movie-archive'
     AUTHOR        = 'Donovan C. Young'
     AEMAIL        = 'dyoung522@gmail.com'
     SUMMARY       = %q{Archives WWIT Show files}
