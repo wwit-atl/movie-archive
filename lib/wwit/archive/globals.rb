@@ -1,6 +1,6 @@
 module WWIT
   module Archive
-    VERSION       = '1.5.0'
+    VERSION       = '1.5.1'
     IDENT         = 'wwit-archive'
     AUTHOR        = 'Donovan C. Young'
     AEMAIL        = 'dyoung522@gmail.com'
@@ -8,6 +8,8 @@ module WWIT
     DESCRIPTION   = %q{Provides a runtime binary which can be called from terminal or cron.}
     HOMEPAGE      = "http://github.com/dyoung522/#{IDENT}"
     LICENSE       = 'MIT'
+
+    VSTRING       = "#{IDENT} v.#{VERSION} - #{AUTHOR}, 2014"
 
     KILOBYTE      = 2 ** 10   # Base 2 (1024)
     MEGABYTE      = 2 ** 20   # Base 2 (1024)

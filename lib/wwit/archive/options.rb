@@ -67,33 +67,20 @@ module WWIT
           opts.separator ''
           opts.separator 'Additional Options:'
 
-          opts.on('-c', '--[no-]copy', 'Copy the files rather than move them') do |c|
-            options.copy = c
-          end
-
-          opts.on('-v', '--[no-]verbose', 'Run verbosely (default)') do |v|
-            options.verbose = v
-          end
-
-          opts.on('-q', '--silent', 'Runs quietly') do
-            options.verbose = false
-          end
-
-          opts.on('--dryrun', %q{Doesn't actually make any changes to the filesystem}) do |d|
-            options.dryrun = d
-          end
-
-          opts.on('--debug', 'Run with debugging options') do |debug|
-            options.debug = debug
-          end
+          opts.on('-c', '--[no-]copy', 'Copy the files rather than move them') { |c| options.copy = c }
+          opts.on('-v', '--[no-]verbose', 'Run verbosely (default)') { |v| options.verbose = v }
+          opts.on('-q', '--silent', 'Run quietly (same as --no-verbose)') { options.verbose = false }
+          opts.on('--dryrun', %q{Don't actually modify any files, just show what would happen}) { options.dryrun = true }
+          opts.on('--debug', 'Run with debugging options') { options.debug = debug }
 
           opts.on_tail('-h', '--help', 'Show this message') do
+            puts VSTRING + "\n\n"
             puts opts
             exit 255
           end
 
           opts.on_tail('-V', '--version', 'Show version') do
-            puts "#{IDENT} v.#{VERSION} - #{AUTHOR}"
+            puts VSTRING
             exit 255
           end
 

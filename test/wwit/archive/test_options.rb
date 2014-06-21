@@ -94,7 +94,7 @@ module WWIT
       end
 
       def test_options_version
-        assert_output "#{IDENT} v.#{VERSION} - #{AUTHOR}\n" do
+        assert_output "#{VSTRING}\n" do
           begin
             Options.parse(['--version'])
           rescue SystemExit
