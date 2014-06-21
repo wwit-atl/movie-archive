@@ -44,7 +44,7 @@ module WWIT
               options.source << dir
             else
               puts "Whoops: '#{dir}' is not a directory."
-              exit
+              exit 2
             end
           end
 
@@ -54,7 +54,7 @@ module WWIT
               options.dest = dir
             else
               puts "Whoops: '#{dir}' is not a directory" + ( dir =~ /^\d+$/ ? "... maybe you meant '-D #{dir}'?" : '' )
-              exit
+              exit 2
             end
           end
 
@@ -89,12 +89,12 @@ module WWIT
 
           opts.on_tail('-h', '--help', 'Show this message') do
             puts opts
-            exit
+            exit 255
           end
 
           opts.on_tail('-V', '--version', 'Show version') do
             puts "#{IDENT} v.#{VERSION} - #{AUTHOR}"
-            exit
+            exit 255
           end
 
         end

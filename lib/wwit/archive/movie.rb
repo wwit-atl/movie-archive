@@ -60,6 +60,16 @@ module WWIT
         Time.at %x(`which stat` -f'%B' #{fullpath}).to_i
       end
 
+      # Returns the age of the file in seconds
+      def age
+        Time.now - birth
+      end
+
+      # Returns the age of the file in days
+      def age_in_days
+        (age / 86400 ).round(2)
+      end
+
       # Returns a string representing the appropriate abbreviated file size
       def size_to_s
         case
@@ -126,7 +136,7 @@ module WWIT
         newfname
       end
 
-      def process( dest = directory, copy = false )
+      def process( copy = false, dest = directory )
         newfname = newfilename( dest )
 
         if File.identical?( fullpath, newfname )

@@ -96,6 +96,14 @@ module WWIT
         assert_equal "/tmp/#{filename}", @movie.newfilename('/tmp')
       end
 
+      def test_movie_age
+        assert_equal (Time.now - @movie.birth).to_i, @movie.age.to_i
+      end
+
+      def test_movie_age_in_days
+        assert_equal ((Time.now - @movie.birth) / 86400).round(2), @movie.age_in_days
+      end
+
     end
   end
 end

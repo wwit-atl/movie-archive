@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'wwit/archive'
+require 'colorize'
 
 # Don't do anything if we're only including this file's classes
 # return unless __FILE__ == $0
@@ -8,55 +9,52 @@ require 'wwit/archive'
 opt = WWIT::Archive::Options.parse(ARGV)
 
 if opt.verbose
-  puts "Source directories are #{opt.source.join(', ')}"
-  puts "Destination directory is #{opt.dest ? opt.dest : 'determined by source file'}"
-  puts "We'll be working on files older than #{opt.days} day#{opt.days > 1 ? 's' : ''}" if opt.days > 0
+  puts "Source directories are".light_white + " #{opt.source.join(', ').green}"
+  puts "Destination directory is".light_white + " #{(opt.dest ? opt.dest : 'same as source file').green}"
+  puts "We'll be working on files older than ".light_white +
+           opt.days.to_s.green + " day#{opt.days > 1 ? 's' : ''}".light_white if opt.days > 0
 end
 
-puts if opt.dryrun and opt.verbose
-puts "Hey! DRYRUN is enabled, so no filesystem changes will be made." if opt.dryrun
-puts if opt.dryrun and opt.verbose
+print "\n" if opt.dryrun and opt.verbose
+puts "Hey! DRYRUN is enabled, so no filesystem changes will be made.".yellow if opt.dryrun
+print "\n" if opt.dryrun and opt.verbose
 
 # Create our movies object -- which, in turn, contains each movie file in the given source dir(s)
 movies = WWIT::Archive::Movies.new( opt.source )
 
 if movies.empty?
-  puts 'Hmm, no movie files were found.  Check your source directories?' if opt.verbose
-  exit
+  puts 'Hmm, no movie files were found.  Check your source directories?'.light_red if opt.verbose
+  exit 1
 end
 
 puts "#{opt.present_verb} #{movies.count} files... " if opt.verbose
 
 # Today's datetime
-today = Time.new
 file_count = 0
 
 # Process each movie file
 movies.each do |movie|
+  dest = opt.dest || movie.directory
 
   # Make sure it's older than the days to keep
-  days_old = ( (today - movie.birth) / 86400 )
-  if days_old <= opt.days
-    puts "Skipped #{movie}:  Too New (#{days_old.to_i} days old)" if opt.verbose
+  if opt.days > movie.age_in_days
+    puts "Skipped #{movie}:  Too New (#{movie.age_in_days} days old)".light_red if opt.verbose
     next
   end
 
-  print "%s %s ->\n     %s ( %s )\n" % [
+  print "%s %s ->\n     %s ( %s )\n".light_black % [
       opt.future_verb,
       movie.fullpath,
-      movie.newfilename( opt.dest || movie.dir ),
+      movie.newfilename( dest ),
       movie.size_to_s
-  ] if opt.verbose
+  ] if opt.debug
 
-  if opt.dryrun
-    puts 'Processing skipped due to --dryrun' if opt.verbose
-    next
-  end
+  next if opt.dryrun
 
-  movie.process( opt.dest || movie.directory, opt.copy )
+  movie.process( opt.copy, dest )
   file_count += 1
 end
 
-puts "Complete - #{file_count} files #{opt.past_verb}" if opt.verbose
-exit( 0 )
+puts "Complete - #{file_count} files #{opt.past_verb}".green if opt.verbose
+exit 0
 
