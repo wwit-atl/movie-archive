@@ -50,7 +50,7 @@ module WWIT
       end
 
       # Converts and returns the file size in a 0.00 float, based upon a given multiplier
-      def size_to_f( multiplier = 1024 )
+      def size_to_f( multiplier = KILOBYTE )
         '%.2f' % ( size.to_f / multiplier )
       end
 
@@ -72,13 +72,13 @@ module WWIT
       # Returns a string representing the appropriate abbreviated file size
       def size_to_s
         case
-          when size == 0        then "Empty"
-          when size >= PETABYTE then size_to_f( PETABYTE ) + "P"
-          when size >= TERABYTE then size_to_f( TERABYTE ) + "T"
-          when size >= GIGABYTE then size_to_f( GIGABYTE ) + "G"
-          when size >= MEGABYTE then size_to_f( MEGABYTE ) + "M"
-          when size >= KILOBYTE then size_to_f( KILOBYTE ) + "K"
-          else size + "B"
+          when size == 0        then 'Empty'
+          when size >= PETABYTE then size_to_f( PETABYTE ) + 'P'
+          when size >= TERABYTE then size_to_f( TERABYTE ) + 'T'
+          when size >= GIGABYTE then size_to_f( GIGABYTE ) + 'G'
+          when size >= MEGABYTE then size_to_f( MEGABYTE ) + 'M'
+          when size >= KILOBYTE then size_to_f( KILOBYTE ) + 'K'
+          else size + 'B'
         end
       end
 
