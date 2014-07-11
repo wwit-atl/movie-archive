@@ -8,13 +8,14 @@ opt = WWIT::Archive::Options.parse(ARGV)
 if opt.verbose
   puts 'Source directories are'.light_white + " #{opt.source.join(', ').green}"
   puts 'Destination directory is'.light_white + " #{(opt.dest ? opt.dest : 'same as source file').green}"
+  puts 'Files '.light_white + (opt.cloud ? 'will also'.green : 'will not'.light_red) + ' be copied to the AWS Cloud Drive'.light_white
   puts "We'll be working on files older than ".light_white +
            opt.days.to_s.green + " day#{opt.days > 1 ? 's' : ''}".light_white if opt.days > 0
 end
 
 if opt.dryrun
   print "\n" if opt.verbose
-  puts 'Hey! DRYRUN is enabled, so no filesystem changes will be made.'.yellow
+  puts 'Hey! DRYRUN is enabled, NO filesystem changes will be made.'.light_yellow
   print "\n" if opt.verbose
 end
 
