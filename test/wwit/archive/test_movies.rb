@@ -68,6 +68,13 @@ module WWIT
           assert_equal @test_file, movie.fullpath
         end
       end
+
+      def test_aws_credentials
+        movies = Movies.new(@test_directory, cloud: true)
+        assert Options.have_cloud_credentials?, 'Do not have cloud credentials'
+        assert movies.cloud_valid?, 'Cloud credentials failed'
+      end
+
     end
   end
 end

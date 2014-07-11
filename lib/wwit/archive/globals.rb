@@ -1,5 +1,7 @@
 module WWIT
   module Archive
+    require 'yaml'
+
     VERSION       = '2.0.0'
     IDENT         = 'movie-archive'
     AUTHOR        = 'Donovan C. Young'
@@ -16,9 +18,18 @@ module WWIT
     TERABYTE      = 10 ** 12  # Base 10 (1000000000000)
     PETABYTE      = 10 ** 15  # Base 10 (1000000000000000)
 
-    AWS_ACCESS_KEY_ID     = ENV['AWS_ACCESS_KEY_ID']
-    AWS_SECRET_ACCESS_KEY = ENV['AWS_SECRET_ACCESS_KEY']
-    AWS_REGION            = ENV['AWS_REGION']
-    AWS_BUCKET            = ENV['AWS_BUCKET']
+    aws_cred_file = File.expand_path('~/.aws/credentials')
+    if File.exists?(aws_cred_file)
+      aws ||= YAML.load_file(aws_cred_file)
+      AWS_ACCESS_KEY_ID     = aws['access_key_id']
+      AWS_SECRET_ACCESS_KEY = aws['secret_access_key']
+      AWS_BUCKET            = aws['bucket']
+      AWS_REGION            = aws['region'] || 'us-east-1'
+    else
+      AWS_ACCESS_KEY_ID     = ENV['AWS_ACCESS_KEY_ID']
+      AWS_SECRET_ACCESS_KEY = ENV['AWS_SECRET_ACCESS_KEY']
+      AWS_BUCKET            = ENV['AWS_BUCKET']
+      AWS_REGION            = ENV['AWS_REGION'] || 'us-east-1'
+    end
   end
 end

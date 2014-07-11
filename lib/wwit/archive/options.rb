@@ -20,8 +20,7 @@ module WWIT
       end
 
       def self.have_cloud_credentials?
-        File.exists?(File.expand_path('~/.aws/credentials')) or
-            !( ENV['AWS_ACCESS_KEY_ID'].nil? or ENV['AWS_SECRET_ACCESS_KEY'].nil? )
+        !( AWS_ACCESS_KEY_ID.nil? or AWS_SECRET_ACCESS_KEY.nil? or AWS_BUCKET.nil?)
       end
 
       def self.parse( argv_opts = [] )

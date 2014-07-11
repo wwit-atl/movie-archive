@@ -20,7 +20,7 @@ if opt.dryrun
 end
 
 # Create our movies object -- which, in turn, contains each movie file in the given source dir(s)
-movies = WWIT::Archive::Movies.new( opt.source )
+movies = WWIT::Archive::Movies.new( opt.source, opt )
 
 if movies.empty?
   puts 'Hmm, no movie files were found.  Check your source directories?'.light_red if opt.verbose

@@ -103,17 +103,16 @@ module WWIT
       end
 
       def test_cloud
-        have_file = File.exists?(File.expand_path('~/.aws/credentials'))
-        have_env  = !( ENV['AWS_ACCESS_KEY_ID'].nil? or ENV['AWS_SECRET_ACCESS_KEY'].nil? )
-        assert_equal (have_file or have_env), Options.have_cloud_credentials?
+        creds = !( AWS_ACCESS_KEY_ID.nil? or AWS_SECRET_ACCESS_KEY.nil?)
+        assert_equal creds, Options.have_cloud_credentials?
 
-        if Options.have_cloud_credentials?
+        if creds
           assert @options.cloud, 'Cloud should be ON by default'
         else
           refute @options.cloud, 'Cloud should be OFF by default without creds'
         end
 
-        assert Options.parse(['--cloud']).cloud, 'Cloud should be ON' if Options.have_cloud_credentials?
+        assert Options.parse(['--cloud']).cloud, 'Cloud should be ON' if creds
         refute Options.parse(['--no-cloud']).cloud, 'Cloud should be OFF'
       end
 

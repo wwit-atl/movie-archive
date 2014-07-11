@@ -8,10 +8,18 @@ require __dir__ + '/movie'
 module WWIT
   module Archive
     class Movies
+      require 'aws-sdk'
 
-      def initialize( source = '.', opt = {} )
+      def initialize( source = '.', opts = {} )
         @file_list = []
-        @opt = opt
+
+        if opts[:cloud] and Options.have_cloud_credentials?
+          @bucket = AWS::S3.new(
+              access_key_id:     AWS_ACCESS_KEY_ID,
+              secret_access_key: AWS_SECRET_ACCESS_KEY,
+              region:            AWS_REGION
+          ).buckets[AWS_BUCKET]
+        end
 
         [source].flatten.each do |dir|
           raise RuntimeError, "Invalid Directory: #{dir}" unless File.directory?(dir)
@@ -20,6 +28,10 @@ module WWIT
 
         # Clean up the data
         @file_list.flatten.uniq!
+      end
+
+      def cloud_valid?
+        !@bucket.nil? and @bucket.exists?
       end
 
       # Returns an array of directories representing the files in the container
