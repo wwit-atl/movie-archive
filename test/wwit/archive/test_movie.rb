@@ -9,6 +9,7 @@ module WWIT
         super
         @datetime_sunday_1am = Time.parse('2014-Jun-22 01:00') # Sunday @ 1AM
         @movie = Movie.new(@test_file)
+        @birth = Time.at(1403272792)
         refute_nil @movie
         assert_instance_of WWIT::Archive::Movie, @movie
       end
@@ -60,7 +61,7 @@ module WWIT
       end
 
       def test_movie_birth
-        assert_equal Time.at(1403272792), @movie.birth
+        assert_equal @birth, @movie.birth
       end
 
       def test_movie_date
@@ -97,13 +98,21 @@ module WWIT
       end
 
       def test_movie_age
-        assert_equal (Time.now - @movie.birth).to_i, @movie.age.to_i
+        assert_equal (Time.now - @birth).to_i, @movie.age.to_i
       end
 
       def test_movie_age_in_days
-        assert_equal ((Time.now - @movie.birth) / 86400).round(2), @movie.age_in_days
+        assert_equal ((Time.now - @birth) / 86400).round(2), @movie.age_in_days
       end
 
+      def test_movie_copy
+        new_file = '/tmp/2014-Jun-20-Fri-2100.mp4'
+        File.delete(new_file) if File.exists?(new_file)
+        refute File.exists?(new_file), "#{new_file} already exists, control failed"
+        @movie.process(true, new_file)
+        assert File.exists?(new_file), "#{@test_file} wasn't copied to #{new_file}"
+        File.delete(new_file) if File.exists?(new_file)
+      end
     end
   end
 end
